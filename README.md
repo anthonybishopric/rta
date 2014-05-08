@@ -21,3 +21,7 @@ rta -e .git/ -e log/ spec specs/models/foo_spec.rb
 ```
 
 The `-i` option lets you specify which directories to listen to exclusively.
+
+## License
+
+MIT
