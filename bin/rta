@@ -41,6 +41,21 @@ unless options[:no_clear]
   command = "clear && #{command}"
 end
 
+active_thread = nil
+
+# Trapping INT lets ctrl-C terminate
+# the thread running the underlying call
+
+Signal.trap("SIGINT") do
+  if active_thread
+    active_thread.kill
+    active_thread = nil
+    $stderr.puts "rta: killed active thread\n"
+  else
+    exit
+  end
+end
+
 fsevent = FSEvent.new
 active = false
 fsevent.watch Dir.pwd do |directories|
@@ -65,9 +80,10 @@ fsevent.watch Dir.pwd do |directories|
 
   if not active and not skip
     active = true
-    Thread.new do
+    active_thread = Thread.new do
       system command
       active = false
+      active_thread = nil
     end
   elsif verbose
     puts "did not execute - command is active" if active
