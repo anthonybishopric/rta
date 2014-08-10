@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'rta'
-  s.version     = '0.1.0'
+  s.version     = '0.2.0'
   s.date        = '2014-05-06'
   s.summary     = 'Run This Again.'
   s.description = 'The rta command is kind of like "guard-lite". If you don\'t want to muck with Guardfiles and need to configure the command you run, rta is for you!'

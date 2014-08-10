@@ -44,6 +44,9 @@ unless options[:no_clear]
   command = "clear && #{command}"
 end
 
+# run once at the begining
+system command
+
 active_thread = nil
 
 # Trapping INT lets ctrl-C terminate
@@ -97,7 +100,7 @@ fsevent.watch Dir.pwd do |directories|
       sleep options[:sleep]
       active = false
       active_thread = nil
-      set_title = "rta: waiting"
+      set_title "rta: waiting"
     end
   elsif verbose
     puts "did not execute - command is active" if active
