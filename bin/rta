@@ -1,9 +1,9 @@
-#! /usr/bin/env ruby
+#!/usr/bin/env ruby
 
 require 'rb-fsevent'
 require 'optparse'
 
-options = {}
+options = {:sleep => 0}
 excludes = []
 includes = []
 verbose = false
@@ -21,6 +21,9 @@ opts = OptionParser.new do |opts|
   end
   opts.on("-e", "--exclude-dir DIRECTORY", "Ignore the given directory when its contents change. The value should be relative to the current working directory.") do |d|
     excludes.push(File.expand_path(d, Dir.pwd) + "/")
+  end
+  opts.on("-s", "--sleep SECS", "After executing a run, sleep for a number of seconds. This is useful if the process being run changes the directory you are working with, causing an infinite loop.") do |s|
+    options[:sleep] = s.to_i
   end
   opts.on_tail("-h", "--help", "Show help") do
     puts opts
@@ -51,10 +54,17 @@ Signal.trap("SIGINT") do
     active_thread.kill
     active_thread = nil
     $stderr.puts "rta: killed active thread\n"
+    set_title "rta: waiting"
   else
     exit
   end
 end
+
+def set_title(str)
+  print "\033]0;#{str}\007"
+end
+
+set_title "rta: waiting"
 
 fsevent = FSEvent.new
 active = false
@@ -78,12 +88,16 @@ fsevent.watch Dir.pwd do |directories|
     end
   end
 
-  if not active and not skip
+  if !(active || skip)
     active = true
     active_thread = Thread.new do
+      set_title "rta: running #{command}"
       system command
+      set_title "rta: sleeping"
+      sleep options[:sleep]
       active = false
       active_thread = nil
+      set_title = "rta: waiting"
     end
   elsif verbose
     puts "did not execute - command is active" if active
