@@ -3,7 +3,7 @@
 require 'rb-fsevent'
 require 'optparse'
 
-options = {}
+options = {:sleep => 0}
 excludes = []
 includes = []
 verbose = false
@@ -21,6 +21,9 @@ opts = OptionParser.new do |opts|
   end
   opts.on("-e", "--exclude-dir DIRECTORY", "Ignore the given directory when its contents change. The value should be relative to the current working directory.") do |d|
     excludes.push(File.expand_path(d, Dir.pwd) + "/")
+  end
+  opts.on("-s", "--sleep", "Sleep for a second after running the command. This can help prevent infinite loops") do
+    options[:sleep] = 1
   end
   opts.on_tail("-h", "--help", "Show help") do
     puts opts
@@ -82,6 +85,7 @@ fsevent.watch Dir.pwd do |directories|
     active = true
     active_thread = Thread.new do
       system command
+      sleep options[:sleep]
       active = false
       active_thread = nil
     end
