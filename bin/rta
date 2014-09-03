@@ -22,8 +22,8 @@ opts = OptionParser.new do |opts|
   opts.on("-e", "--exclude-dir DIRECTORY", "Ignore the given directory when its contents change. The value should be relative to the current working directory.") do |d|
     excludes.push(File.expand_path(d, Dir.pwd) + "/")
   end
-  opts.on("-s", "--sleep SECS", "After executing a run, sleep for a number of seconds. This is useful if the process being run changes the directory you are working with, causing an infinite loop.") do |s|
-    options[:sleep] = s.to_i
+  opts.on("-s", "--sleep", "Sleep for a second after running the command. This can help prevent infinite loops") do
+    options[:sleep] = 1
   end
   opts.on_tail("-h", "--help", "Show help") do
     puts opts
@@ -96,7 +96,6 @@ fsevent.watch Dir.pwd do |directories|
     active_thread = Thread.new do
       set_title "rta: running #{command}"
       system command
-      set_title "rta: sleeping"
       sleep options[:sleep]
       active = false
       active_thread = nil
